@@ -15,6 +15,7 @@ drivers/base/regmap/regmap-i2c.ko
 drivers/base/regmap/regmap-spi.ko
 drivers/base/regmap/regmap-mmio.ko
 drivers/block/loop.ko
+drivers/block/virtio_blk.ko
 drivers/block/xen-blkfront.ko
 drivers/cdrom/cdrom.ko
 drivers/char/ttyprintk.ko

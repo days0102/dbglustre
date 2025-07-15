@@ -341,4 +341,7 @@ source "fs/nls/Kconfig"
 source "fs/dlm/Kconfig"
 source "fs/unicode/Kconfig"
 
+# Lustre
+source "fs/lustre/Kconfig"
+
 endmenu
