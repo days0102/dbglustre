@@ -14,7 +14,7 @@ kernel_build=$PWD/rootfs_debian_x86_64/usr/src/linux/
 rootfs_path=$PWD/rootfs_debian_x86_64
 rootfs_image=$PWD/rootfs_debian_x86_64.ext4
 
-rootfs_size=8192
+rootfs_size=10240
 
 SMP="-smp 16 -enable-kvm -cpu host"
 
@@ -124,19 +124,20 @@ build_rootfs(){
 }
 
 run_qemu_debian(){
-		qemu-system-x86_64 -m 4096\
+		sudo qemu-system-x86_64 -m 12288\
 			-nographic $SMP -kernel arch/x86/boot/bzImage \
 			-append "noinintrd console=ttyS0 crashkernel=256M root=/dev/vda rootfstype=ext4 rw loglevel=8 nokaslr" \
 			-drive if=none,file=rootfs_debian_x86_64.ext4,id=hd0 \
 			-device virtio-blk-pci,drive=hd0 \
 			-netdev user,id=mynet\
-			-device virtio-net-pci,netdev=mynet\
+			-device virtio-net-pci,netdev=mynet \
+			-netdev tap,id=tapnet,script=$PWD/net_up,downscript=$PWD/net_down \
+			-device virtio-net-pci,netdev=tapnet,mac=80:d4:39:62:2d:8c \
 			$DBG
 			# --fsdev local,id=kmod_dev,path=./kmodules,security_model=none \
 			# -device virtio-9p-pci,fsdev=kmod_dev,mount_tag=kmod_mount\
 			# -net user,hostfwd=tcp::8888-:22 \
 			# -net nic,model=virtio \
-
 }
 
 case $1 in
