@@ -124,7 +124,7 @@ build_rootfs(){
 }
 
 run_qemu_debian(){
-		sudo qemu-system-x86_64 -m 12288\
+		sudo qemu-system-x86_64 -m 12288 \
 			-nographic $SMP -kernel arch/x86/boot/bzImage \
 			-append "noinintrd console=ttyS0 crashkernel=256M root=/dev/vda rootfstype=ext4 rw loglevel=8 nokaslr" \
 			-drive if=none,file=rootfs_debian_x86_64.ext4,id=hd0 \
@@ -133,6 +133,71 @@ run_qemu_debian(){
 			-device virtio-net-pci,netdev=mynet \
 			-netdev tap,id=tapnet,script=$PWD/net_up,downscript=$PWD/net_down \
 			-device virtio-net-pci,netdev=tapnet,mac=80:d4:39:62:2d:8c \
+			$DBG
+			# --fsdev local,id=kmod_dev,path=./kmodules,security_model=none \
+			# -device virtio-9p-pci,fsdev=kmod_dev,mount_tag=kmod_mount\
+			# -net user,hostfwd=tcp::8888-:22 \
+			# -net nic,model=virtio \
+}
+
+WBC_SMP="-smp 8 -enable-kvm -cpu host"
+
+run_wbc_cn0(){
+		sudo qemu-system-x86_64 -m 8192 \
+			-nographic $WBC_SMP -kernel arch/x86/boot/bzImage \
+			-append "noinintrd console=ttyS0 crashkernel=256M root=/dev/vda rootfstype=ext4 rw loglevel=8 nokaslr" \
+			-drive if=none,file=/hub/wbc0.ext4,id=hd0 \
+			-device virtio-blk-pci,drive=hd0 \
+			-netdev user,id=mynet\
+			-device virtio-net-pci,netdev=mynet \
+			-netdev tap,id=tapnet,script=$PWD/net_up,downscript=$PWD/net_down \
+			-device virtio-net-pci,netdev=tapnet,mac=80:d4:39:62:2d:8c \
+			-drive if=none,file=/hub/mgt.img,id=hd1 \
+			-device virtio-blk-pci,drive=hd1 \
+			-drive if=none,file=/hub/mdt.img,id=hd2 \
+			-device virtio-blk-pci,drive=hd2 \
+			-drive if=none,file=/hub/ost0.img,id=hd3 \
+			-device virtio-blk-pci,drive=hd3 \
+			-drive if=none,file=/hub/ost1.img,id=hd4 \
+			-device virtio-blk-pci,drive=hd4 \
+			$DBG
+			# --fsdev local,id=kmod_dev,path=./kmodules,security_model=none \
+			# -device virtio-9p-pci,fsdev=kmod_dev,mount_tag=kmod_mount\
+			# -net user,hostfwd=tcp::8888-:22 \
+			# -net nic,model=virtio \
+}
+
+run_wbc_cn1(){
+		sudo qemu-system-x86_64 -m 8192 \
+			-nographic $WBC_SMP -kernel arch/x86/boot/bzImage \
+			-append "noinintrd console=ttyS0 crashkernel=256M root=/dev/vda rootfstype=ext4 rw loglevel=8 nokaslr" \
+			-drive if=none,file=/hub/wbc1.ext4,id=hd0 \
+			-device virtio-blk-pci,drive=hd0 \
+			-netdev user,id=mynet\
+			-device virtio-net-pci,netdev=mynet \
+			-netdev tap,id=tapnet,script=$PWD/net_up,downscript=$PWD/net_down \
+			-device virtio-net-pci,netdev=tapnet,mac=80:d4:39:62:2d:8d \
+			-drive if=none,file=/hub/pcc.img,id=hd1 \
+			-device virtio-blk-pci,drive=hd1 \
+			$DBG
+			# --fsdev local,id=kmod_dev,path=./kmodules,security_model=none \
+			# -device virtio-9p-pci,fsdev=kmod_dev,mount_tag=kmod_mount\
+			# -net user,hostfwd=tcp::8888-:22 \
+			# -net nic,model=virtio \
+}
+
+run_wbc_cn2(){
+		sudo qemu-system-x86_64 -m 8192 \
+			-nographic $WBC_SMP -kernel arch/x86/boot/bzImage \
+			-append "noinintrd console=ttyS0 crashkernel=256M root=/dev/vda rootfstype=ext4 rw loglevel=8 nokaslr" \
+			-drive if=none,file=/hub/wbc2.ext4,id=hd0 \
+			-device virtio-blk-pci,drive=hd0 \
+			-netdev user,id=mynet\
+			-device virtio-net-pci,netdev=mynet \
+			-netdev tap,id=tapnet,script=$PWD/net_up,downscript=$PWD/net_down \
+			-device virtio-net-pci,netdev=tapnet,mac=80:d4:39:62:2d:8e \
+			-drive if=none,file=/hub/pcc1.img,id=hd1 \
+			-device virtio-blk-pci,drive=hd1 \
 			$DBG
 			# --fsdev local,id=kmod_dev,path=./kmodules,security_model=none \
 			# -device virtio-9p-pci,fsdev=kmod_dev,mount_tag=kmod_mount\
@@ -175,5 +240,62 @@ case $1 in
 		#build_rootfs
 		run_qemu_debian
 		;;
+	run_wbc_cn0)
+
+		if [ ! -f $LROOT/arch/x86/boot/bzImage ]; then
+			echo "canot find kernel image, pls run build_kernel command firstly!!"
+			echo "./run_debian_x86_64.sh build_kernel"
+			exit 1
+		fi
+
+		if [ ! -f $rootfs_image ]; then
+			echo "canot find rootfs image, pls run build_rootfs command firstly!!"
+			echo "sudo ./run_debian_x86_64.sh build_rootfs"
+			exit 1
+		fi
+
+		#prepare_rootfs
+		#build_rootfs
+		run_wbc_cn0
+		;;
+
+	run_wbc_cn1)
+
+		if [ ! -f $LROOT/arch/x86/boot/bzImage ]; then
+			echo "canot find kernel image, pls run build_kernel command firstly!!"
+			echo "./run_debian_x86_64.sh build_kernel"
+			exit 1
+		fi
+
+		if [ ! -f $rootfs_image ]; then
+			echo "canot find rootfs image, pls run build_rootfs command firstly!!"
+			echo "sudo ./run_debian_x86_64.sh build_rootfs"
+			exit 1
+		fi
+
+		#prepare_rootfs
+		#build_rootfs
+		run_wbc_cn1
+		;;
+
+	run_wbc_cn2)
+
+		if [ ! -f $LROOT/arch/x86/boot/bzImage ]; then
+			echo "canot find kernel image, pls run build_kernel command firstly!!"
+			echo "./run_debian_x86_64.sh build_kernel"
+			exit 1
+		fi
+
+		if [ ! -f $rootfs_image ]; then
+			echo "canot find rootfs image, pls run build_rootfs command firstly!!"
+			echo "sudo ./run_debian_x86_64.sh build_rootfs"
+			exit 1
+		fi
+
+		#prepare_rootfs
+		#build_rootfs
+		run_wbc_cn2
+		;;
+
 esac
 
